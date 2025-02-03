@@ -1,15 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat&family=Poiret+One&display=swap');
 
 :root {
-  --background: #051707;
-  --primary: #83e594;
-  --secondary: #1c865e;
-  --accent: #4fdab6;
-  --text: #ddf8e1;
+  --text: #0d1609;
+  --background: #f6faf4;
+  --primary: #75b450;
+  --secondary: #97d2a8;
+  --accent: #82c9a7;
 }
 
 * {
-  font-family: 'Montserrat';
+  font-family: 'Poiret One';
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -19,7 +19,9 @@ body {
   width: 100vw;
   height: 100vh;
   background-color: var(--background);
-  color: var(--text)
+  color: var(--text);
+  display: grid;
+  place-items: center;
 }
 
 .button-primary {
@@ -27,6 +29,17 @@ body {
   padding: 0.5rem 1rem;
   border-radius: 10px;
   border: none;
+  font-family: "Montserrat";
+  cursor: pointer;
+}
+
+button {
+  font-size: 1rem;
+}
+
+a {
+  color: #000;
+  text-decoration: none;
 }
 
 #manager {

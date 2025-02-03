@@ -13,22 +13,22 @@ export default class Router extends Component {
       About
     }
 
-    const transition = page => {
-      const manager = document.getElementById(managerId);
-      manager.innerHTML = new pages[page]()
+    const transition = (manager, page) => {
+      manager.innerHTML = new pages[page]();
     };
 
-    this.loadScripts(() => {
+    this.scripts = () => {
       const navItems = document.querySelectorAll('.nav-item');
+      const manager = document.getElementById(managerId);
 
       [...navItems].forEach(item => {
         item.onclick = () => {
-          transition(item.textContent);
+          transition(manager, item.textContent);
         }
       })
-    });
+    };
 
-    this.render(/* html */`
+    this.template = /* html */`
       <nav id="navigation">
         ${
           Object.keys(pages).map(page => {
@@ -37,8 +37,8 @@ export default class Router extends Component {
         }
       </nav>
       <section id="${managerId}" style="height: 100%;">
-        ${new pages.Home()}
+        ${new Home()}
       </section>
-    `);
+  `;
   }
 }

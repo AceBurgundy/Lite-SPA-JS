@@ -15,9 +15,8 @@ export const getFullPath = (importMeta) => {
 
 export default class Component {
   constructor() {
-    const _cssPromises = [];
-    let _template;
-    let _scripts;
+    this.template;
+    this.scripts;
 
     const shouldNotAttachToWindow = [
       'It is not recommended to attach events to the window element.',
@@ -38,7 +37,7 @@ export default class Component {
       ]
 
       const attachedToWindow = discouragedWindowEvents.some(eventType => {
-        return _scripts.toString().trim().toLowerCase().includes(eventType)
+        return this.scripts.toString().trim().toLowerCase().includes(eventType)
       })
 
       if (attachedToWindow) {
@@ -47,117 +46,48 @@ export default class Component {
     }
 
     /**
-     * Load CSS files based on the provided paths.
-     * @param {'import.meta'} importMeta - the import.meta of a function. Simply pass `import.meta`
-     * @throws {Error} if importMeta is null
-     * @param {string[]} cssPaths - list of CSS paths to be loaded.
-     */
-    this.css = (importMeta, cssPaths) => {
-      let scriptPath = getFullPath(importMeta);
-
-      const scriptFileName = scriptPath.split("/").pop();
-      scriptPath = scriptPath.replace(scriptFileName, "");
-
-      if (!cssPaths) {
-        console.error(`List of css paths is empty from ${scriptFileName}`);
-        return;
-      }
-
-      cssPaths.forEach((cssPath) => {
-        if (cssPath.startsWith("/")) {
-          cssPath = scriptPath + cssPath;
-        }
-
-        else if (!cssPath.includes("/")) {
-          cssPath = scriptPath + "/" + cssPath;
-        }
-
-        else if (cssPath.startsWith("./")) {
-          cssPath = cssPath.slice(2);
-          cssPath = scriptPath + cssPath;
-        }
-
-        const cssAlreadyLinked = document.querySelector(
-          `link[href='${cssPath}']`
-        );
-
-        if (cssAlreadyLinked) {
-          return;
-        }
-
-        const cssPromise = new Promise((resolve, reject) => {
-          const styleLink = document.createElement("link");
-          styleLink.rel = "stylesheet";
-          styleLink.href = cssPath;
-          styleLink.onload = () => resolve();
-          styleLink.onerror = () => reject();
-          document.head.appendChild(styleLink);
-        });
-
-        _cssPromises.push(cssPromise);
-      });
-    }
-
-    /**
-     * Sets the script for the template code
-     *
-     * @throws {Error} if script argument is null
-     * @throws {Error} if script argument is not a function
-     */
-    this.scripts = script => {
-      if (!script) {
-        throw new Error('Setting scripts with a missing argument')
-      };
-
-      if (typeof script !== 'function') {
-        throw new Error('Script argument must be a function or a callback function')
-      };
-
-      _scripts = script;
-      warnScriptsAttachedToWindow();
-    }
-
-    /**
      * Sets the template for the template
      *
      * @throws {Error} if template is null
      * @throws {Error} if template is not a string
      * @throws {Error} if template is an empty string
+     * @throws {Error} if scripts is not a callback function
      */
-    this.template = html => {
-      if (!html) {
-        throw new Error('Template is required for a component');
-      }
-
-      if (typeof html !== 'string') {
+    const validate = () => {
+      if (typeof this.template !== 'string') {
         throw new Error('Template must be a string');
       }
 
-      if (html === '') {
+      if (this.template === '') {
         throw new Error('Template is required for a component');
       }
 
-      _template = html;
+      if (!this.scripts) {
+        return;
+      }
+
+      warnScriptsAttachedToWindow();
+
+      if (typeof this.scripts !== 'function') {
+        throw new Error('Script argument must be a function or a callback function')
+      };
     }
 
     /**
      * Render the template.
-     * @param {string} template - The template to be rendered.
+     * @param {HTMLAllCollection} element - the element where the template will be rendered.
      * @throws {Error} if element to render to is null
      */
-    this.render = element => {
-      if (!element) {
-        throw new Error('Element is required to render the template to');
-      }
+    this.render = () => {
+      validate();
 
-      Promise.all(_cssPromises)
-        .then(() => {
-          element.innerHTML = _template;
-          if (_scripts) _scripts();
-        })
-        .catch(error =>
-          console.error('Failed to load css: ', error)
-        )
-    }
+      setTimeout(() => {
+        if (this.scripts) this.scripts();
+      }, 0);
+
+      return this.template
+    };
   }
+
+  toString = () => this.render();
 }

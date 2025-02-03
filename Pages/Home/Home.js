@@ -7,11 +7,7 @@ export default class Home extends Component {
     const likeCounter = "like-counter";
     const likeButton = "like-button";
 
-    this.loadCSS(import.meta, [
-      "./Styles/Home.css"
-    ])
-
-    this.loadScripts(() => {
+    this.scripts = () => {
       const counter = document.getElementById(likeCounter);
       const button = document.getElementById(likeButton);
 
@@ -19,9 +15,9 @@ export default class Home extends Component {
         let count = parseInt(counter.textContent)
         counter.textContent = count + 1;
       }
-    })
+    }
 
-    this.render(/* html */`
+    this.template = /* html */`
       <div class="home">
         <h1 class="title">ShockJS</h1>
         <div class="like-section">
@@ -29,6 +25,6 @@ export default class Home extends Component {
           <button id="${likeButton}" class="button-primary like-section__button">Like</button>
         </div>
       </div>
-    `)
+    `;
   }
 }

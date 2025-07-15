@@ -12,8 +12,8 @@
 .like-section {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: 1rem;
-    align-items: center;
 }
 
 .like-section__counter {
@@ -21,11 +21,32 @@
 }
 
 @media screen and (orientation: portrait) {
+    body {
+        display: grid;
+        place-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
     .home {
+        align-items: flex-end;
+        width: 100vw;
+        display: grid;
+        place-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .like-section {
         align-items: flex-end;
     }
 
     .title {
-        font-size: 13rem;
+        font-size: calc(20rem + 1.5vw);
+    }
+
+    #navigation {
+        position: relative;
+        top: unset
     }
 }

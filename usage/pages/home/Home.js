@@ -19,23 +19,23 @@ export class Home extends Component {
     };
 
     this.template = /* html */`
-      <nav id="navigation">
-        ${
-          new Redirect({
-            destination: About,
-            id: "about-page",
-            path: "/about",
-            attributes: {"class": "nav-item button-primary"},
-            innerHTML: "About"
-          })
-        }
-      </nav>
       <div class="home">
         <h1 class="title">Lite SPA JS</h1>
         <div class="like-section">
           <div class="like-section__counter" id="${counterId}">${count}</div>
           <button id="${likeButton}" class="button-primary like-section__button">Like</button>
         </div>
+        <nav id="navigation">
+          ${
+            new Redirect({
+              destination: About,
+              id: "about-page",
+              path: "/about",
+              attributes: {"class": "nav-item button-primary"},
+              innerHTML: "About"
+            })
+          }
+        </nav>
       </div>
   `;
   }

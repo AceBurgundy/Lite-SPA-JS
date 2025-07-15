@@ -3,10 +3,32 @@
 }
 
 .about h1 {
-    font-size: calc(2.5rem + 1vw);
-    margin-bottom: 1rem;
+    font-size: calc(2.5rem + 0.8vw);
+    margin-bottom: 2rem;
 }
 
 .about p {
-    font-size: calc(2rem + 1vw);
+    font-size: calc(2rem + 0.7vw);
+}
+
+@media screen and (orientation: portrait) {
+    body {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    .about h1 {
+        margin-top: 2rem;
+        font-size: calc(2.5rem + 4vw);
+        margin-bottom: 3rem;
+        text-align: justify;
+    }
+    
+    .about p {
+        font-size: calc(2rem + 3vw);
+        margin-bottom: 3rem;
+        text-align: justify;
+    }    
 }

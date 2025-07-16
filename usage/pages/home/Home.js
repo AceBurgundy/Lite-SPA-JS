@@ -1,14 +1,14 @@
 import { Component, Redirect, css } from '../../../Component.js';
 import { About } from '../about/About.js';
 
-css(import.meta, [
-  "./styles/home.css"
-])
-
 export class Home extends Component {
   constructor() {
     super();
 
+    css(import.meta, [
+      "./styles/home.css"
+    ])
+    
     const likeButton = "like-button";
     let [counterId, count, setCount] = this.state(0, "like-section__counter");
 

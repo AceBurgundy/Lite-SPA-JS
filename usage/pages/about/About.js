@@ -1,13 +1,13 @@
 import { Component, css } from '../../../Component.js';
 
-css(import.meta, [
-  "./styles/about.css"
-])
-
 export class About extends Component {
   constructor() {
     super();
 
+    css(import.meta, [
+      "./styles/about.css"
+    ])
+    
     this.template = /* html */`
       <div class="about">
         <h1>

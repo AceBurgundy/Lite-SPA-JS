@@ -1,4 +1,4 @@
-const history = {};
+      const history = {};
 
 /**
  * Allows navigation by using browser < and > buttons by keeping track of the "/path": Component
@@ -189,6 +189,8 @@ export const css = (importMeta, cssPaths) =>
     cssPath = cssPath.startsWith("/")
       ? pathToScript + cssPath
       : pathToScript + "/" + cssPath.replace(/^\.\/?/, "");
+
+    cssPath = cssPath.replace(/([^:]\/)\/+/g, "$1");
 
     const cssAlreadyLinked = document.querySelector(`link[href='${cssPath}']`);
 

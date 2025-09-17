@@ -3,31 +3,41 @@
 This is Lite SPA JS, a lightweight JavaScript library designed to make building single-page applications (SPAs) easier and more enjoyable. It focuses on a unified approach, combining HTML and JavaScript within a single `Component` class.
 
 ### For Who
-- Programmers who want to make small websites using React's Component Based Development while still be able to utilize their common html, css and javascript knowledge. 
+
+* Programmers who want to make small websites using React's Component Based Development while still be able to utilize their common HTML, CSS and JavaScript knowledge.
 
 **VS Code Tip:**
 
-For a more enjoyable development experience in VS Code, install the extension, "Inline HTML". This allows syntax highlighting for your html templates directly within your JavaScript files, providing a seamless workflow.
+For a more enjoyable development experience in VS Code, install the extension **Inline HTML**. This allows syntax highlighting for your HTML templates directly within your JavaScript files, providing a seamless workflow.
+
+---
 
 ### Features
 
 * **Component Class:** Lite SPA JS centers around the `Component` class. This class allows you to define your application's structure and logic within a single unit, promoting code organization and maintainability.
 * **State Management:** Manage state effectively with the `state` method within the `Component` class. It provides a clear way to track dynamic data and update the DOM accordingly.
-* **Event Handling:** Bind event listeners to elements after rendering using the `scripts` property in the `Component` class. This approach encourages separation of concerns and keeps your components clean.
-* **CSS Management:** Utilize the `css` helper function to load CSS files associated with your components. This ensures a clean and organized stylesheet strategy.
+* **Logic Handling:** Use the `logic` property in the `Component` class to bind event listeners and add interactivity after rendering. This encourages clean separation of structure and behavior.
+* **CSS Management:** Use the `css()` helper function to load CSS files associated with your components. This ensures a clean and organized stylesheet strategy.
+* **Script Management:** Use the `scripts()` helper function to dynamically inject external `<script>` tags (such as CDNs) into `<head>`. Supports attributes like `type`, `async`, `defer`, `crossorigin`, and `integrity`.
 * **Navigation:** Implement navigation between components using the `Redirect` class. It provides a clear way to define links that update the URL and render the corresponding component.
+
+---
 
 ### Warning
 
-* **Overriden CSS:** The css function simply loads css files inside the <head> element to group related css and component together. If used improperly, styles with the same selectors will be overriden just as how it would normally be. This doesn't work like css modules.
+* **Overriden CSS:** The `css()` function simply loads CSS files inside the `<head>` element to group related CSS and components together. If used improperly, styles with the same selectors will be overridden just as they normally would. This doesn’t work like CSS modules.
 
-  - To allow the page to load just a bit faster and reduce FOUC, call it inside a component. This way css() will load along the component. Calling css() outside a component will load it on the initial page load. Meaning, if all of your css() calls are outside all of your components, all of them will be called on the initial page load causing unnecessary delay.
-    
+  * To reduce FOUC and speed up initial load, call `css()` inside a component so styles are only loaded when the component is used. Calling `css()` outside a component loads styles during the initial page load, which can cause unnecessary delays.
+
+---
+
 ### Benefits
 
 * **Simplified SPA Development:** Lite SPA JS removes the need for complex boilerplate code, allowing you to focus on building the core functionalities of your application.
 * **Improved Code Organization:** The `Component` class promotes well-structured and maintainable code by combining HTML structure and JavaScript logic in a unified manner.
 * **Enhanced Developer Experience:** Lite SPA JS prioritizes a clean and streamlined development experience.
+
+---
 
 ### Getting Started
 
@@ -37,9 +47,9 @@ While not strictly necessary, you can install Lite SPA JS locally for developmen
 
 **2. Include a Script:**
 
-Add a script.js file to your html which will house you initial component to be rendered
+Add a `script.js` file to your HTML which will house your initial component to be rendered:
 
-```javascript
+```html
 <!DOCTYPE html>
 <html>
   <head>
@@ -49,7 +59,6 @@ Add a script.js file to your html which will house you initial component to be r
     <link rel="stylesheet" href="./usage/style.css">
   </head>
   <body>
-
   </body>
 </html>
 ```
@@ -58,7 +67,7 @@ Add a script.js file to your html which will house you initial component to be r
 
 Define your application's components by extending the `Component` class. Here's an example of a basic component:
 
-```javascript
+```js
 import { Component } from './path/to/Component.js';
 
 export class MyComponent extends Component {
@@ -78,36 +87,38 @@ export class MyComponent extends Component {
 
 Use the `Root` class inside your `script.js` to render your initial component:
 
-```javascript
+```js
 import { Root } from './path/to/Component.js';
 import { MyComponent } from './components/MyComponent.js';
 
-new Root({destination: MyComponent}).render();
+new Root({ destination: MyComponent }).render();
 ```
 
 **5. Navigation:**
 
 Implement navigation between components using the `Redirect` class:
 
-```javascript
+```js
 import { Redirect } from './path/to/Component.js';
 
 const aboutPageLink = new Redirect({
   destination: About, // Replace with your About component
   id: "about-page",
   path: "/about",
-  attributes: {"class": "nav-item button-primary"},
+  attributes: { "class": "nav-item button-primary" },
   innerHTML: "About"
 });
 
-/// Will render an achor tag when added to this.template of a component.
+// Will render an <a> tag when added to this.template of a component.
 ```
 
-**Modularization**
+---
 
-Reuse Components inside other Components:
+### Modularization
 
-```javascript
+Reuse components inside other components:
+
+```js
 import { Component } from './Component.js';
 import { Header } from './components/Header.js';
 import { Footer } from './components/Footer.js';
@@ -128,21 +139,24 @@ export class HomePage extends Component {
 }
 ```
 
-**State Management:**
+---
 
-Implement simple state management components by using this.state:
+### State Management and Logic
 
-```javascript
-import { Component, Redirect, css } from '../../../Component.js';
+Implement simple state management and logic handling inside components:
+
+```js
+import { Component, Redirect, css, scripts } from '../../../Component.js';
 import { About } from '../about/About.js';
 
 export class Home extends Component {
   constructor() {
     super();
 
-    css(import.meta, [
-      "./styles/home.css"
-    ]);
+    css(import.meta, ["./styles/home.css"]);
+
+    // Example of loading an external script (CDN)
+    scripts("https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js");
 
     const likeButton = "like-button";
     let [counterId, count, setCount] = this.state(0, "like-section__counter");
@@ -160,7 +174,7 @@ export class Home extends Component {
             destination: About,
             id: "about-page",
             path: "/about",
-            attributes: {"class": "nav-item button-primary"},
+            attributes: { "class": "nav-item button-primary" },
             innerHTML: "About"
           })
         }
@@ -172,9 +186,7 @@ export class Home extends Component {
           <button id="${likeButton}" class="button-primary like-section__button">Like</button>
         </div>
       </div>
-  `;
+    `;
   }
 }
 ```
-
-This is a basic overview of Lite SPA JS. The provided examples showcase some fundamental features to get you started. Refer to the source code for a comprehensive understanding and explore the possibilities of building SPAs with this lightweight library.

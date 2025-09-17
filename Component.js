@@ -1,4 +1,4 @@
-      const history = {};
+const history = {};
 
 /**
  * Allows navigation by using browser < and > buttons by keeping track of the "/path": Component
@@ -195,7 +195,7 @@ export const css = (importMeta, cssPaths) =>
     const cssAlreadyLinked = document.querySelector(`link[href='${cssPath}']`);
 
     if (cssAlreadyLinked) {
-      console.warn(`CSS file already exists for path: ${cssPath}`);
+      // console.warn(`CSS file already exists for path: ${cssPath}`);
       return;
     }
 
@@ -206,6 +206,44 @@ export const css = (importMeta, cssPaths) =>
     document.head.appendChild(styleLink);
   });
 
+/**
+ * Dynamically load a <script> into <head>.
+ * Ensures no duplicates by checking for an existing matching src.
+ *
+ * @param {string} src - The script source URL (usually a CDN).
+ * @param {Object} [options={}] - Optional script attributes.
+ * @param {string} [options.type] - Script type, e.g., "module".
+ * @param {boolean} [options.async] - Whether to load asynchronously.
+ * @param {boolean} [options.defer] - Whether to defer execution.
+ * @param {string} [options.crossorigin] - Crossorigin attribute, e.g., "anonymous".
+ * @param {string} [options.integrity] - Subresource integrity hash.
+ */
+export const scripts = (src, options = {}) => {
+  if (!src || typeof src !== "string") {
+    throw new Error("scripts() requires a valid 'src' string.");
+  }
+
+  // Prevent duplicate loads
+  const existingScript = document.querySelector(`script[data-scripts="${src}"]`);
+  if (existingScript) {
+    return; // already loaded
+  }
+
+  const scriptElement = document.createElement("script");
+  scriptElement.src = src;
+
+  // Apply optional attributes
+  if (options.type) scriptElement.type = options.type;
+  if (options.async) scriptElement.async = true;
+  if (options.defer) scriptElement.defer = true;
+  if (options.crossorigin) scriptElement.crossOrigin = options.crossorigin;
+  if (options.integrity) scriptElement.integrity = options.integrity;
+
+  // Mark this script so it’s not reloaded later
+  scriptElement.setAttribute("data-scripts", src);
+  document.head.appendChild(scriptElement);
+};
+
 // Using ES2022 features for private fields
 export class Component {
   #states = {};
@@ -213,7 +251,7 @@ export class Component {
 
   constructor() {
     this.template = ""; // Public field (set only)
-    this.scripts = null; // Public field (set only)
+    this.logic = null; // Public field (set only)
 
     /**
      * Helper function to validate the template and scripts.
@@ -227,7 +265,7 @@ export class Component {
         throw new Error("Template is required for a component");
       }
 
-      if (this.scripts && typeof this.scripts !== "function") {
+      if (this.logic && typeof this.logic !== "function") {
         throw new Error("Scripts must be a function");
       }
     };
@@ -293,7 +331,7 @@ export class Component {
       // Append the root element to the DOM
       setTimeout(() => {
         bindStateElements(); // Bind state elements after rendering
-        if (this.scripts) this.scripts(); // Execute scripts (event listeners etc.)
+        if (this.logic) this.logic(); // Execute scripts (event listeners etc.)
       }, 0);
 
       return this.template; // Return the rendered template

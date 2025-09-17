@@ -12,7 +12,7 @@ export class Home extends Component {
     const likeButton = "like-button";
     let [counterId, count, setCount] = this.state(0, "like-section__counter");
 
-    this.scripts = () => {
+    this.logic = () => {
       document.getElementById(likeButton).onclick = () => {
         setCount(++count);
       };

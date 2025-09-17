@@ -207,40 +207,28 @@ export const css = (importMeta, cssPaths) =>
   });
 
 /**
- * Dynamically load a <script> into <head>.
- * Ensures no duplicates by checking for an existing matching src.
+ * Inject a CDN script into <head>.
+ * Usage: cdn("https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js")
  *
- * @param {string} src - The script source URL (usually a CDN).
- * @param {Object} [options={}] - Optional script attributes.
- * @param {string} [options.type] - Script type, e.g., "module".
- * @param {boolean} [options.async] - Whether to load asynchronously.
- * @param {boolean} [options.defer] - Whether to defer execution.
- * @param {string} [options.crossorigin] - Crossorigin attribute, e.g., "anonymous".
- * @param {string} [options.integrity] - Subresource integrity hash.
+ * @param {string} url - Full URL of the CDN script.
  */
-export const scripts = (src, options = {}) => {
-  if (!src || typeof src !== "string") {
-    throw new Error("scripts() requires a valid 'src' string.");
+export const cdn = url => {
+  if (!url || typeof url !== "string") {
+    throw new Error("cdn() requires a valid URL string.");
   }
 
   // Prevent duplicate loads
-  const existingScript = document.querySelector(`script[data-scripts="${src}"]`);
+  const existingScript = document.querySelector(`script[data-cdn="${url}"]`);
   if (existingScript) {
     return; // already loaded
   }
 
   const scriptElement = document.createElement("script");
-  scriptElement.src = src;
+  scriptElement.src = url;
 
-  // Apply optional attributes
-  if (options.type) scriptElement.type = options.type;
-  if (options.async) scriptElement.async = true;
-  if (options.defer) scriptElement.defer = true;
-  if (options.crossorigin) scriptElement.crossOrigin = options.crossorigin;
-  if (options.integrity) scriptElement.integrity = options.integrity;
+  // Mark so we don’t load it again
+  scriptElement.setAttribute("data-cdn", url);
 
-  // Mark this script so it’s not reloaded later
-  scriptElement.setAttribute("data-scripts", src);
   document.head.appendChild(scriptElement);
 };
 

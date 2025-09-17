@@ -18,7 +18,7 @@ For a more enjoyable development experience in VS Code, install the extension **
 * **State Management:** Manage state effectively with the `state` method within the `Component` class. It provides a clear way to track dynamic data and update the DOM accordingly.
 * **Logic Handling:** Use the `logic` property in the `Component` class to bind event listeners and add interactivity after rendering. This encourages clean separation of structure and behavior.
 * **CSS Management:** Use the `css()` helper function to load CSS files associated with your components. This ensures a clean and organized stylesheet strategy.
-* **Script Management:** Use the `scripts()` helper function to dynamically inject external `<script>` tags (such as CDNs) into `<head>`. Supports attributes like `type`, `async`, `defer`, `crossorigin`, and `integrity`.
+* **CDN Loader:** Use the `cdn()` helper function to easily inject external scripts (such as CDNs) into `<head>`. Just pass the CDN URL as a string.
 * **Navigation:** Implement navigation between components using the `Redirect` class. It provides a clear way to define links that update the URL and render the corresponding component.
 
 ---
@@ -146,7 +146,7 @@ export class HomePage extends Component {
 Implement simple state management and logic handling inside components:
 
 ```js
-import { Component, Redirect, css, scripts } from '../../../Component.js';
+import { Component, Redirect, css, cdn } from '../../../Component.js';
 import { About } from '../about/About.js';
 
 export class Home extends Component {
@@ -155,8 +155,8 @@ export class Home extends Component {
 
     css(import.meta, ["./styles/home.css"]);
 
-    // Example of loading an external script (CDN)
-    scripts("https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js");
+    // Example of loading an external script via CDN
+    cdn("https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js");
 
     const likeButton = "like-button";
     let [counterId, count, setCount] = this.state(0, "like-section__counter");

@@ -208,27 +208,53 @@ export const css = (importMeta, cssPaths) =>
 
 /**
  * Inject a CDN script into <head>.
- * Usage: cdn("https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js")
+ * Accepts either:
+ *   1) A full <script> tag string (preferred, matches CDN copy-paste).
+ *   2) A plain URL string (fallback).
  *
- * @param {string} url - Full URL of the CDN script.
+ * Example:
+ *   cdn('<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>');
+ *
+ * @param {string} input - Full <script> tag string OR URL string.
  */
-export const cdn = url => {
-  if (!url || typeof url !== "string") {
-    throw new Error("cdn() requires a valid URL string.");
+export const cdn = input => {
+  if (!input || typeof input !== "string") {
+    throw new Error("cdn() requires a <script> string or URL string.");
   }
 
-  // Prevent duplicate loads
-  const existingScript = document.querySelector(`script[data-cdn="${url}"]`);
-  if (existingScript) {
-    return; // already loaded
+  // If a full <script> tag is passed
+  if (input.trim().startsWith("<script") == true) {
+    const templateElement = document.createElement("template");
+    templateElement.innerHTML = input.trim();
+
+    const parsedScript = templateElement.content.firstChild;
+
+    if (!(parsedScript instanceof HTMLScriptElement) == true) {
+      throw new Error("cdn() string must be a <script> tag.");
+    }
+
+    const scriptSrc = parsedScript.src;
+    if (!scriptSrc) throw new Error("<script> tag must include a src attribute.");
+
+    // Prevent duplicates
+    if (document.querySelector(`script[data-cdn="${scriptSrc}"]`)) {
+      return;
+    }
+
+    parsedScript.setAttribute("data-cdn", scriptSrc);
+    document.head.appendChild(parsedScript);
+    return;
+  }
+
+  // If only a URL was passed
+  const scriptSrc = input.trim();
+  if (document.querySelector(`script[data-cdn="${scriptSrc}"]`)) {
+    return;
   }
 
   const scriptElement = document.createElement("script");
-  scriptElement.src = url;
-
-  // Mark so we don’t load it again
-  scriptElement.setAttribute("data-cdn", url);
-
+  scriptElement.src = scriptSrc;
+  scriptElement.setAttribute("data-cdn", scriptSrc);
   document.head.appendChild(scriptElement);
 };
 

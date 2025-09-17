@@ -18,7 +18,7 @@ For a more enjoyable development experience in VS Code, install the extension **
 * **State Management:** Manage state effectively with the `state` method within the `Component` class. It provides a clear way to track dynamic data and update the DOM accordingly.
 * **Logic Handling:** Use the `logic` property in the `Component` class to bind event listeners and add interactivity after rendering. This encourages clean separation of structure and behavior.
 * **CSS Management:** Use the `css()` helper function to load CSS files associated with your components. This ensures a clean and organized stylesheet strategy.
-* **CDN Loader:** Use the `cdn()` helper function to easily inject external scripts (such as CDNs) into `<head>`. Just pass the CDN URL as a string.
+* **CDN Loader:** Use the `cdn()` helper function to easily inject external scripts (such as CDNs) into `<head>`. Just copy-paste the full `<script>` tag string from any CDN provider.
 * **Navigation:** Implement navigation between components using the `Redirect` class. It provides a clear way to define links that update the URL and render the corresponding component.
 
 ---
@@ -155,8 +155,11 @@ export class Home extends Component {
 
     css(import.meta, ["./styles/home.css"]);
 
-    // Example of loading an external script via CDN
-    cdn("https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js");
+    // Example of loading an external script via CDN (copy-paste friendly)
+    cdn(`<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>`);
+
+    // Example of loading a module from CDN
+    cdn(`<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>`);
 
     const likeButton = "like-button";
     let [counterId, count, setCount] = this.state(0, "like-section__counter");

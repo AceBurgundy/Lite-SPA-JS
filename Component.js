@@ -217,46 +217,101 @@ export const css = (importMeta, cssPaths) =>
  *
  * @param {string} input - Full <script> tag string OR URL string.
  */
-export const cdn = input => {
+export const cdn = input => new Promise((resolve, reject) => {
   if (!input || typeof input !== "string") {
-    throw new Error("cdn() requires a <script> string or URL string.");
+    reject(
+      new Error("cdn() requires a <script> string or URL string.")
+    );
+
+    return;
   }
 
   // If a full <script> tag is passed
-  if (input.trim().startsWith("<script") == true) {
+  if (input.trim().startsWith("<script") === true) {
     const templateElement = document.createElement("template");
     templateElement.innerHTML = input.trim();
 
     const parsedScript = templateElement.content.firstChild;
 
-    if (!(parsedScript instanceof HTMLScriptElement) == true) {
-      throw new Error("cdn() string must be a <script> tag.");
+    if (!(parsedScript instanceof HTMLScriptElement) === true) {
+      reject(
+        new Error("cdn() string must be a <script> tag.")
+      );
+
+      return;
     }
 
     const scriptSrc = parsedScript.src;
-    if (!scriptSrc) throw new Error("<script> tag must include a src attribute.");
+
+    if (!scriptSrc) {
+      reject(
+        new Error("<script> tag must include a src attribute.")
+      );
+
+      return;
+    }
 
     // Prevent duplicates
-    if (document.querySelector(`script[data-cdn="${scriptSrc}"]`)) {
+    const existing = document.querySelector(`script[data-cdn="${scriptSrc}"]`);
+
+    if (existing) {
+      if (existing.dataset.loaded === "true") {
+        resolve();
+      } else {
+        existing.addEventListener("load", () => resolve(), { once: true });
+        existing.addEventListener("error", () => reject(
+          new Error(`Failed to load ${scriptSrc}`)
+        ), { once: true });
+      }
+
       return;
     }
 
     parsedScript.setAttribute("data-cdn", scriptSrc);
+
+    parsedScript.onload = () => {
+      parsedScript.dataset.loaded = "true";
+      resolve();
+    };
+
+    parsedScript.onerror = () => reject(
+      new Error(`Failed to load ${scriptSrc}`)
+    );
+
     document.head.appendChild(parsedScript);
     return;
   }
 
   // If only a URL was passed
   const scriptSrc = input.trim();
-  if (document.querySelector(`script[data-cdn="${scriptSrc}"]`)) {
+  const existing = document.querySelector(`script[data-cdn="${scriptSrc}"]`);
+  if (existing) {
+    if (existing.dataset.loaded === "true") {
+      resolve();
+    } else {
+      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("error", () => reject(
+        new Error(`Failed to load ${scriptSrc}`)
+      ), { once: true });
+    }
+
     return;
   }
 
   const scriptElement = document.createElement("script");
   scriptElement.src = scriptSrc;
   scriptElement.setAttribute("data-cdn", scriptSrc);
+
+  scriptElement.onload = () => {
+    scriptElement.dataset.loaded = "true";
+    resolve();
+  };
+
+  scriptElement.onerror = () => reject(
+    new Error(`Failed to load ${scriptSrc}`)
+  );
   document.head.appendChild(scriptElement);
-};
+});
 
 // Using ES2022 features for private fields
 export class Component {

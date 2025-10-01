@@ -1,71 +1,82 @@
-## Lite SPA JS: Simpler Single-Page Applications (Built For Fun) [View Website](https://lite-spa-js.vercel.app/)
+# Lite SPA JS: Simpler Single-Page Applications (Built For Fun)
 
-This is Lite SPA JS, a lightweight JavaScript library designed to make building single-page applications (SPAs) easier and more enjoyable. It focuses on a unified approach, combining HTML and JavaScript within a single `Component` class.
+[View Website](https://lite-spa-js.vercel.app/)
 
-### For Who
+Lite SPA JS is a lightweight JavaScript library designed to make building single-page applications (SPAs) easier and more enjoyable. It focuses on a unified approach, combining HTML and JavaScript within a single `Component` class.
 
-* Programmers who want to make small websites using React's Component Based Development while still be able to utilize their common HTML, CSS and JavaScript knowledge.
+## Table of Contents
 
-**VS Code Tip:**
+- [Lite SPA JS: Simpler Single-Page Applications (Built For Fun)](#lite-spa-js-simpler-single-page-applications-built-for-fun)
+  - [Table of Contents](#table-of-contents)
+  - [For Who](#for-who)
+  - [Features](#features)
+  - [Warning](#warning)
+  - [Benefits](#benefits)
+  - [Getting Started](#getting-started)
+    - [1. Installation (Optional)](#1-installation-optional)
+    - [2. Include a Script](#2-include-a-script)
+    - [3. Create Components](#3-create-components)
+    - [4. Render the Application](#4-render-the-application)
+    - [5. Navigation](#5-navigation)
+  - [Modularization](#modularization)
+    - [State Management, Logic, and CDN Usage](#state-management-logic-and-cdn-usage)
+  - [Toast Notifications (Singleton Example)](#toast-notifications-singleton-example)
+    - [Toast Component Overview](#toast-component-overview)
+    - [How It Works](#how-it-works)
+    - [1. Adding Toast as a DOM Element](#1-adding-toast-as-a-dom-element)
+    - [2. Calling Toast Methods Globally](#2-calling-toast-methods-globally)
+    - [3. Combination of the two](#3-combination-of-the-two)
 
-For a more enjoyable development experience in VS Code, install the extension **Inline HTML**. This allows syntax highlighting for your HTML templates directly within your JavaScript files, providing a seamless workflow.
+## For Who
 
----
+* Developers who want to build small websites using React’s **component-based development** style while still relying on familiar **HTML, CSS, and JavaScript**.
 
-### Features
+💡 **VS Code Tip:**
+Install the **Inline HTML** extension for syntax highlighting of embedded HTML templates inside your JavaScript files.
 
-* **Component Class:** Lite SPA JS centers around the `Component` class. This class allows you to define your application's structure and logic within a single unit, promoting code organization and maintainability.
-* **State Management:** Manage state effectively with the `state` method within the `Component` class. It provides a clear way to track dynamic data and update the DOM accordingly.
-* **Logic Handling:** Use the `logic` property in the `Component` class to bind event listeners and add interactivity after rendering. This encourages clean separation of structure and behavior.
-* **CSS Management:** Use the `css()` helper function to load CSS files associated with your components. This ensures a clean and organized stylesheet strategy.
-* **CDN Loader:** Use the `cdn()` helper function to easily inject external scripts (such as CDNs) into `<head>`. Just copy-paste the full `<script>` tag string from any CDN provider.
-* **Navigation:** Implement navigation between components using the `Redirect` class. It provides a clear way to define links that update the URL and render the corresponding component.
+## Features
 
----
+* **Component Class:** Define structure and logic within a single unit.
+* **State Management:** Manage dynamic data and re-render efficiently.
+* **Logic Handling:** Use the `logic` property to bind events after rendering.
+* **CSS Management:** Load CSS per component with `css()`.
+* **CDN Loader:** Easily load external scripts with `cdn()`, which returns a `Promise` when loaded.
+* **Navigation:** Seamlessly handle SPA routing with the `Redirect` class.
 
-### Warning
+## Warning
 
-* **Overriden CSS:** The `css()` function simply loads CSS files inside the `<head>` element to group related CSS and components together. If used improperly, styles with the same selectors will be overridden just as they normally would. This doesn’t work like CSS modules.
+* The `css()` loader is **not CSS modules**. Selectors can override one another.
+* For better performance:
 
-  * To reduce FOUC and speed up initial load, call `css()` inside a component so styles are only loaded when the component is used. Calling `css()` outside a component loads styles during the initial page load, which can cause unnecessary delays.
+  * Call `css()` **inside** components (load on demand).
+  * Avoid calling `css()` globally unless styles are required on initial load.
 
----
+## Benefits
 
-### Benefits
+* **Simplified SPA Development** with less boilerplate.
+* **Improved Code Organization** via unified components.
+* **Enhanced Developer Experience** with a streamlined workflow.
 
-* **Simplified SPA Development:** Lite SPA JS removes the need for complex boilerplate code, allowing you to focus on building the core functionalities of your application.
-* **Improved Code Organization:** The `Component` class promotes well-structured and maintainable code by combining HTML structure and JavaScript logic in a unified manner.
-* **Enhanced Developer Experience:** Lite SPA JS prioritizes a clean and streamlined development experience.
+## Getting Started
 
----
+### 1. Installation (Optional)
 
-### Getting Started
+You can install Lite SPA JS locally or directly include it in your HTML.
 
-**1. Installation (Optional):**
-
-While not strictly necessary, you can install Lite SPA JS locally for development purposes. However, you can also directly include the library script in your HTML.
-
-**2. Include a Script:**
-
-Add a `script.js` file to your HTML which will house your initial component to be rendered:
+### 2. Include a Script
 
 ```html
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title></title>
     <script src="./usage/script.js" type="module"></script>
     <link rel="stylesheet" href="./usage/style.css">
   </head>
-  <body>
-  </body>
+  <body></body>
 </html>
 ```
 
-**3. Create Components:**
-
-Define your application's components by extending the `Component` class. Here's an example of a basic component:
+### 3. Create Components
 
 ```js
 import { Component } from './path/to/Component.js';
@@ -73,7 +84,6 @@ import { Component } from './path/to/Component.js';
 export class MyComponent extends Component {
   constructor() {
     super();
-
     this.template = /* html */`
       <div>
         <h1>My Component</h1>
@@ -83,9 +93,7 @@ export class MyComponent extends Component {
 }
 ```
 
-**4. Render the Application:**
-
-Use the `Root` class inside your `script.js` to render your initial component:
+### 4. Render the Application
 
 ```js
 import { Root } from './path/to/Component.js';
@@ -94,29 +102,22 @@ import { MyComponent } from './components/MyComponent.js';
 new Root({ destination: MyComponent }).render();
 ```
 
-**5. Navigation:**
-
-Implement navigation between components using the `Redirect` class:
+### 5. Navigation
 
 ```js
 import { Redirect } from './path/to/Component.js';
 
-const aboutPageLink = new Redirect({
-  destination: About, // Replace with your About component
+const aboutLink = new Redirect({
+  destination: About, 
   id: "about-page",
   path: "/about",
-  attributes: { "class": "nav-item button-primary" },
   innerHTML: "About"
 });
-
-// Will render an <a> tag when added to this.template of a component.
 ```
 
----
+## Modularization
 
-### Modularization
-
-Reuse components inside other components:
+You can reuse components by composing them:
 
 ```js
 import { Component } from './Component.js';
@@ -126,12 +127,10 @@ import { Footer } from './components/Footer.js';
 export class HomePage extends Component {
   constructor() {
     super();
-
     this.template = /* html */`
       ${new Header()}
       <div class="content">
         <h1>Welcome to the Home Page</h1>
-        <p>This is the main content of the home page.</p>
       </div>
       ${new Footer()}
     `;
@@ -139,57 +138,297 @@ export class HomePage extends Component {
 }
 ```
 
----
+### State Management, Logic, and CDN Usage
 
-### State Management and Logic
+Lite SPA JS supports simple state management, DOM event logic, and lazy loading of external scripts. The `cdn()` helper now returns a `Promise` that resolves once the script is fully loaded, allowing you to delay execution until the dependency is ready.
 
-Implement simple state management and logic handling inside components:
+This is especially useful for **performance-heavy components** like 3D models. Instead of blocking the entire page by loading `@google/model-viewer` at startup, you can lazy-load it only when the section comes into view. That way, the rest of the site stays fast and responsive.
+
+Here’s an example `Contact` component that loads a 3D `@` symbol using `model-viewer`. The CDN script is injected only when the contact section scrolls into view, and the 3D model file itself is loaded later for even better performance:
 
 ```js
-import { Component, Redirect, css, cdn } from '../../../Component.js';
-import { About } from '../about/About.js';
+import { cdn, Component, css } from "../../../Component.js";
+import { SectionIntro } from "../section-intro/SectionIntro.js";
+
+export class Contact extends Component {
+  constructor(navigation, smootherScroll) {
+    super();
+
+    css(import.meta, ["contact.css"]);
+
+    this.logic = () => {
+      // Smooth navigation to any section
+      document.querySelectorAll(".contact-box-bottom-left-section-list__item-link")
+        .forEach(link => {
+          link.addEventListener("click", element => {
+            element.preventDefault();
+            const target = element.currentTarget.getAttribute("href");
+            smootherScroll.scrollTo(target, { duration: 1.5, ease: "power4.out" });
+          });
+        });
+
+      // Lazy load the model-viewer script when top of contact section is 800% away from the viewport
+      ScrollTrigger.create({
+        trigger: "#contact-section",
+        start: "top 800%",
+        onEnter: () => {
+          cdn(`<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>`)
+            .then(() => {
+              document.getElementById("contact-box-bottom-right")?.insertAdjacentHTML("beforeend", /* html */`
+                <model-viewer 
+                  id="contact-3d-model"
+                  src=""
+                  alt="3D @ Symbol"
+                  camera-controls
+                  disable-zoom
+                  camera-orbit="0deg 75deg 4m"
+                  field-of-view="30deg">
+                </model-viewer>
+              `);
+            })
+        },
+        once: true
+      });
+
+      // Lazy load the .glb file separately when closer in view
+      ScrollTrigger.create({
+        trigger: "#contact-section",
+        start: "top 300%",
+        onEnter: () => {
+          document.getElementById("contact-3d-model").src = "app/static/3D/@.glb";
+        },
+        once: true
+      });
+    };
+
+    this.template = /* html */`
+      <section id="contact-section">
+        ${new SectionIntro("Let's talk business!", "Contact Me")}
+        <div id="contact-box">
+          <div id="contact-box-top-left">
+            <p id="contact-message">
+              Planning something new? <br>
+              Let's
+              <span class="hover-swap">
+                <span class="swap-inner">
+                  <span>make it happen.</span>
+                  <span>talk about it!</span>
+                </span>
+              </span>
+            </p>
+          </div>
+          <div id="contact-box-top-right">
+            <p>Works</p>
+          </div>
+          <div id="contact-box-bottom-left">
+            <ul id="contact-box-bottom-left-section-list">${
+              navigation.map(
+                item => /* html */`
+                  <li class="contact-box-bottom-left-section-list__item">
+                    <a alt="${item}" class="contact-box-bottom-left-section-list__item-link" href="#${item}-section">${item}</a>
+                  </li>`
+              ).join("")
+            }</ul>
+            <p id="contact-box-bottom-left-copyright">
+              Sam Adrian P. Sabalo © 2025
+            </p>
+          </div>
+          <div id="contact-box-bottom-right"></div>
+        </div>
+      </section>
+    `;
+  }
+}
+```
+
+✅ **Why this improves performance**:
+
+* The heavy `model-viewer` library isn’t downloaded until the user scrolls near the contact section.
+* The `.glb` 3D model file is deferred even further, reducing initial load time.
+* Other parts of your site (navigation, content, etc.) stay interactive and snappy without being blocked by the 3D asset.
+
+## Toast Notifications (Singleton Example)
+
+Lite SPA JS supports **singleton-style components**, such as a global **toast notification system**.
+
+### Toast Component Overview
+
+The `Toasts` component manages notifications globally:
+
+```js
+import { Component, css } from "../../../Component.js";
+
+class ToastTypes {
+    static INFO = "info";
+    static SUCCESS = "success";
+    static ERROR = "error";
+    static WARNING = "warning";
+
+    static values() {
+        return [this.INFO, this.SUCCESS, this.ERROR, this.WARNING];
+    }
+}
+
+/**
+ * Toasts Component
+ * Singleton class to manage toast notifications.
+ * 
+ * Usage:
+ * import { toast, ToastTypes } from 'path/to/Toasts.js';
+ * toast.show("This is an info message.");
+ * toast.show("This is a success message.", ToastTypes.SUCCESS, 5000);
+ * toast.show("This is an error message.", ToastTypes.ERROR);
+ * toast.show("This is a warning message.", ToastTypes.WARNING, 4000);
+ */
+class Toasts extends Component {
+  /**
+   * @type {Toasts}
+   */
+  static #instance;
+
+  /**
+   * Returns the singleton instance of Toasts.
+   * @returns {Toasts}
+   */
+  constructor() {
+    if (Toasts.#instance) return Toasts.#instance;
+
+    super();
+
+    this.styles = css(import.meta, ["toast.css"]);
+
+    this.logic = () => {};
+
+    this.template = /*html*/ `
+      <div class="toasts" id="toasts">
+      </div>
+    `;
+
+    Toasts.#instance = this;
+  }
+
+  /**
+   * Show a toast notification.
+   * 
+   * @param {string} message - The message to display in the toast.
+   * @param {ToastTypes} [type=ToastTypes.INFO] - The type of toast (info, success, error, warning).
+   * @param {number} [duration=3000] - Duration in milliseconds before the toast disappears.
+   * @returns {void}
+   */
+  show(message, type = ToastTypes.INFO, duration = 3000) {
+    const toastsContainer = document.getElementById("toasts");
+    if (!toastsContainer) return;
+
+    if (!ToastTypes.values().includes(type)) {
+      throw new Error(
+        `Invalid toast type: "${type}". Use one of: ${ToastTypes.values().join(", ")}`
+      );
+    }
+
+    const toast = document.createElement("div");
+    toast.className = `toast toast--${type}`;
+    toast.textContent = message;
+
+    toastsContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add("toast--visible");
+    }, 100);
+
+    setTimeout(() => {
+      toast.classList.remove("toast--visible");
+
+      setTimeout(() => {
+        toastsContainer.removeChild(toast);
+      }, 300); // match CSS transition duration
+    }, duration);
+  }
+
+  // Optional static getter for easy access
+  static get instance() {
+    return this.#instance ?? new Toasts();
+  }
+}
+
+/**
+ * A way to show toast notifications from anywhere in the app.
+ */
+export const toast = Toasts.instance;
+export { ToastTypes };
+```
+
+### How It Works
+
+* `Toasts` is a **singleton component**:
+
+  * The first instantiation creates the DOM container.
+  * Any future calls reuse the same instance.
+
+* The `toast` instance can be:
+
+  1. **Added directly to templates as an element**
+  2. **Called from anywhere in the app programmatically**
+
+### 1. Adding Toast as a DOM Element
+
+```js
+import { Component } from './Component.js';
+import { toast } from './components/common/toasts/Toasts.js';
 
 export class Home extends Component {
   constructor() {
     super();
 
-    css(import.meta, ["./styles/home.css"]);
-
-    // Example of loading an external script via CDN (copy-paste friendly)
-    cdn(`<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>`);
-
-    // Example of loading a module from CDN
-    cdn(`<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>`);
-
-    const likeButton = "like-button";
-    let [counterId, count, setCount] = this.state(0, "like-section__counter");
-
-    this.logic = () => {
-      document.getElementById(likeButton).onclick = () => {
-        setCount(++count);
-      };
-    };
-
     this.template = /* html */`
-      <nav id="navigation">
-        ${
-          new Redirect({
-            destination: About,
-            id: "about-page",
-            path: "/about",
-            attributes: { "class": "nav-item button-primary" },
-            innerHTML: "About"
-          })
-        }
-      </nav>
-      <div class="home">
-        <h1 class="title">Lite SPA JS</h1>
-        <div class="like-section">
-          <div class="like-section__counter" id="${counterId}">${count}</div>
-          <button id="${likeButton}" class="button-primary like-section__button">Like</button>
-        </div>
+      <div>
+        ${toast} <!-- Singleton instance renders automatically -->
+        <button id="button">Show Toast</button>
       </div>
     `;
   }
 }
 ```
+
+### 2. Calling Toast Methods Globally
+
+You can call `toast.show()` anywhere, without adding the instance manually:
+
+```js
+import { toast } from './components/common/toasts/Toasts.js';
+
+function notifyUserLogin() {
+  toast.show("Welcome back!", ToastTypes.SUCCESS);
+}
+```
+
+### 3. Combination of the two
+
+```js
+import { Component } from './Component.js';
+import { toast, ToastTypes } from './components/common/toasts/Toasts.js';
+
+export class Home extends Component {
+  constructor() {
+    super();
+
+    this.scripts = () => {
+      document.getElementById("button").onclick = () => {
+        toast.show("New toast created!", type=ToastTypes.SUCCESS);
+      };
+    };
+
+    this.template = /* html */`
+      <div>
+        ${toast} <!-- Singleton instance renders automatically -->
+        <button id="button">Show Toast</button>
+      </div>
+    `;
+  }
+}
+```
+
+✅ **Advantages of Singleton Usage**
+
+* Only **one toast container** is ever created.
+* Can be **referenced globally** without manually passing around instances.
+* Easy integration into **both DOM templates and JavaScript logic**.

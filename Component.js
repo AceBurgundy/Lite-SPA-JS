@@ -39,9 +39,19 @@ window.onpopstate = event => {
  */
 const uniqueIdentifier = () => Math.random().toString(36).substring(2, 10);
 
+/**
+ * Creates a route state object for history management.
+ * @param {string} path - The navigation path.
+ * @returns {{path: string}} An object representing the route state.
+ */
 const routeState = path => ({ path });
 
+/**
+ * Waits for all pending CSS loads to settle.
+ * @returns {Promise<void|Array<PromiseSettledResult<string>>>} A promise that resolves when all pending CSS loads are settled.
+ */
 const waitForStyles = () => {
+  /** @type {Array<Promise<string>>} */
   const cssLoads = pendingCssLoads.splice(0);
 
   if (cssLoads.length === 0) {
@@ -51,14 +61,23 @@ const waitForStyles = () => {
   return Promise.allSettled(cssLoads);
 };
 
+/**
+ * Intercepts click events on anchor tags with [data-lite-spa-route] attribute for client-side routing.
+ * @param {MouseEvent} event - The click event object.
+ * @returns {void}
+ */
 document.addEventListener("click", event => {
+  /** @type {Element|null} */
   const anchor = event.target?.closest?.("[data-lite-spa-route]");
 
   if (!anchor) {
     return;
   }
 
+  /** @type {string|null} */
   const path = anchor.getAttribute("href");
+
+  /** @type {typeof Component|undefined} */
   const destination = routes[path];
 
   if (!destination) {

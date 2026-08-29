@@ -170,19 +170,33 @@ export class Redirect {
    * @param {string} [options.innerHTML=""] - The innerHTML to display for the anchor tag.
    */
   constructor({ id, destination, path, attributes = {}, innerHTML = "" } = {}) {
+    /**
+     * Helper function to check if a class extends Component.
+     * @type {function(any): boolean}
+     */
     const extendsComponent = value => Object.create(value.prototype) instanceof Component;
+
+    /**
+     * Helper function to check if any element in the array is not a string.
+     * @type {function(Array<string>): boolean}
+     */
     const containsNoneStringData = value => value.some(type => type !== 'string');
 
     /**
-     * @param {Function|Object} value
-     * @returns {boolean}
+     * Checks if a value is a function (excluding constructor classes).
+     * @param {any} value - The value to check.
+     * @returns {boolean} True if the value is a standard function, false otherwise.
      */
     function isFunction(value) {
+      /** @type {Array<string>} */
       const propertyNames = Object.getOwnPropertyNames(value);
       return !propertyNames.includes('prototype') || propertyNames.includes('arguments');
     }
 
+    /** @type {Array<string>} */
     const attributeValueTypes = Object.values(attributes).map(attribute => typeof attribute);
+
+    /** @type {Array<string>} */
     const attributeKeyTypes = Object.keys(attributes).map(attribute => typeof attribute);
 
     if (!id) {
@@ -225,6 +239,7 @@ export class Redirect {
       throw new Error("Redirect's destination parameter only accepts class references extended from Component");
     }
 
+    /** @type {string} */
     const cleanAttributes = Object.entries(attributes)
       .map(([key, value]) => `${key}="${value}"`)
       .join(' ');
@@ -234,6 +249,7 @@ export class Redirect {
      * @returns {string} The anchor tag HTML.
      */
     const render = () => {
+      /** @type {string} */
       const uniqueAnchorId = `${id}-${uniqueIdentifier()}`;
       routes[path] = destination;
 
@@ -241,6 +257,10 @@ export class Redirect {
       return `<a href="${path}" id="${uniqueAnchorId}" data-lite-spa-route="${path}" ${cleanAttributes}>${innerHTML}</a>`;
     };
 
+    /**
+     * Converts the Redirect component to its HTML string representation.
+     * @type {function(): string}
+     */
     this.toString = () => render();
   }
 }

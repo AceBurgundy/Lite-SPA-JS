@@ -320,10 +320,10 @@ export class Root {
 }
 
 /**
- * Returns the full path from the template file to where a function was called;
- * @param {'import.meta'} importMeta - the import.meta of a function. Simply pass `import.meta`
- * @throws {Error} if importMeta is null
- * @return {string} the full path
+ * Returns the full path from the template file to where a function was called.
+ * @param {ImportMeta} importMeta - The import.meta object of the calling module.
+ * @returns {string} The full path string.
+ * @throws {Error} If importMeta is null or undefined.
  */
 export const getFullPath = (importMeta) => {
   if (!importMeta) {
@@ -332,8 +332,9 @@ export const getFullPath = (importMeta) => {
     );
   }
 
-  const scriptSrc = new URL(importMeta.url).pathname;
-  return scriptSrc.startsWith("/") ? scriptSrc.slice(1) : scriptSrc;
+  /** @type {string} */
+  const scriptSource = new URL(importMeta.url).pathname;
+  return scriptSource.startsWith("/") ? scriptSource.slice(1) : scriptSource;
 };
 
 /**

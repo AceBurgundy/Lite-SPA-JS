@@ -273,14 +273,19 @@ export class Root {
    * @param {string} [options.path='/'] - The path to set in the URL.
    */
   constructor({ destination, path = '/' } = {}) {
+    /**
+     * Helper function to check if a class extends Component.
+     * @type {function(any): boolean}
+     */
     const extendsComponent = value => Object.create(value.prototype) instanceof Component;
 
     /**
-     * Checks if a value is a function.
-     * @param {Function|Object} value - The value to check.
-     * @returns {boolean}
+     * Checks if a value is a function (excluding constructor classes).
+     * @param {any} value - The value to check.
+     * @returns {boolean} True if the value is a standard function, false otherwise.
      */
     function isFunction(value) {
+      /** @type {Array<string>} */
       const propertyNames = Object.getOwnPropertyNames(value);
       return !propertyNames.includes('prototype') || propertyNames.includes('arguments');
     }
@@ -301,6 +306,10 @@ export class Root {
       throw new Error("Root's destination parameter only accepts class references extended from Component");
     }
 
+    /**
+     * Renders the Root component and sets the initial path in history.
+     * @returns {void}
+     */
     this.render = () => {
       routes[path] = destination;
 

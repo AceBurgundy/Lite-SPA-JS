@@ -17,10 +17,15 @@ let shouldQueueMounts = false;
 let renderVersion = 0;
 
 /**
- * Allows navigation by using browser < and > buttons by keeping track of the "/path": Component
+ * Allows navigation by using browser < and > buttons by keeping track of the "/path": Component.
+ * @param {PopStateEvent} event - The popstate event object.
+ * @returns {void}
  */
 window.onpopstate = event => {
+  /** @type {string} */
   const path = window.location.pathname;
+
+  /** @type {typeof Component|undefined} */
   const page = routes[path];
 
   if (page) {
@@ -28,7 +33,11 @@ window.onpopstate = event => {
   }
 };
 
-const uniqueId = () => Math.random().toString(36).substring(2, 10);
+/**
+ * Generates a random alphanumeric unique identifier string.
+ * @returns {string} The generated unique identifier.
+ */
+const uniqueIdentifier = () => Math.random().toString(36).substring(2, 10);
 
 const routeState = path => ({ path });
 

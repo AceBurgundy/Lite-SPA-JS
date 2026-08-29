@@ -1,16 +1,101 @@
-const history = {};
+const routes = {};
+const pendingCssLoads = [];
+const pendingMounts = [];
+let activeComponents = [];
+let shouldQueueMounts = false;
+let renderVersion = 0;
 
 /**
  * Allows navigation by using browser < and > buttons by keeping track of the "/path": Component
  */
-window.onpopstate = () => {
+window.onpopstate = event => {
   const path = window.location.pathname;
-  const page = history[path];
+  const page = routes[path];
 
   if (page) {
-    document.body.innerHTML = new page();
+    renderRoute(page, path, { updateHistory: false, state: event.state });
   }
-}
+};
+
+const uniqueId = () => Math.random().toString(36).substring(2, 10);
+
+const routeState = path => ({ path });
+
+const waitForStyles = () => {
+  const cssLoads = pendingCssLoads.splice(0);
+
+  if (cssLoads.length === 0) {
+    return Promise.resolve();
+  }
+
+  return Promise.allSettled(cssLoads);
+};
+
+document.addEventListener("click", event => {
+  const anchor = event.target?.closest?.("[data-lite-spa-route]");
+
+  if (!anchor) {
+    return;
+  }
+
+  const path = anchor.getAttribute("href");
+  const destination = routes[path];
+
+  if (!destination) {
+    return;
+  }
+
+  event.preventDefault();
+  renderRoute(destination, path);
+});
+
+const mountQueuedComponents = () => {
+  const components = pendingMounts.splice(0);
+
+  components.forEach(component => component.__mount());
+
+  return components;
+};
+
+const unmountActiveComponents = () => {
+  if (activeComponents.length === 0) {
+    return;
+  }
+
+  activeComponents.slice().reverse().forEach(component => component.__unmount());
+  activeComponents = [];
+};
+
+const renderRoute = async (destination, path, { replace = false, updateHistory = true } = {}) => {
+  const currentRenderVersion = ++renderVersion;
+  routes[path] = destination;
+
+  let template = "";
+
+  try {
+    pendingMounts.splice(0);
+    shouldQueueMounts = true;
+    const component = new destination();
+    template = component.toString();
+  } finally {
+    shouldQueueMounts = false;
+  }
+
+  await waitForStyles();
+
+  if (currentRenderVersion !== renderVersion) {
+    return;
+  }
+
+  if (updateHistory && window.location.pathname !== path) {
+    const method = replace ? "replaceState" : "pushState";
+    window.history[method](routeState(path), "", path);
+  }
+
+  unmountActiveComponents();
+  document.body.innerHTML = template;
+  activeComponents = mountQueuedComponents();
+};
 
 export class Redirect {
   /**
@@ -88,25 +173,10 @@ export class Redirect {
      */
     const render = () => {
       const uniqueAnchorId = `${id}-${uniqueId()}`;
-
-      // Add the anchor tag with a click event to prevent default behavior
-      setTimeout(() => {
-        const anchor = document.getElementById(uniqueAnchorId);
-
-        if (anchor) {
-          anchor.onclick = event => {
-            event.preventDefault();
-            window.history.pushState({}, '', path); // Update the URL
-            history[path] = destination; // add path and destination to history
-
-            // Replace the body content with the new component
-            document.body.innerHTML = new destination();
-          };
-        }
-      }, 0);
+      routes[path] = destination;
 
       // Return anchor tag with unique ID
-      return `<a href="${path}" id="${uniqueAnchorId}" ${cleanAttributes}>${innerHTML}</a>`;
+      return `<a href="${path}" id="${uniqueAnchorId}" data-lite-spa-route="${path}" ${cleanAttributes}>${innerHTML}</a>`;
     };
 
     this.toString = () => render();
@@ -150,9 +220,10 @@ export class Root {
     }
 
     this.render = () => {
-      window.history.pushState({}, '', path); // Update the URL
-      history[path] = destination; // add path and destination to history
-      document.body.innerHTML = new destination();
+      routes[path] = destination;
+
+      window.history.replaceState(routeState(path), "", path);
+      renderRoute(destination, path, { replace: true, updateHistory: false });
     };
   }
 }
@@ -174,14 +245,12 @@ export const getFullPath = (importMeta) => {
   return scriptSrc.startsWith("/") ? scriptSrc.slice(1) : scriptSrc;
 };
 
-const uniqueId = () => Math.random().toString(36).substring(2, 10);
-
 /**
  * Load CSS files based on the provided paths.
  * @param {string[]} cssPaths - List of CSS paths to be loaded.
  **/
 export const css = (importMeta, cssPaths) =>
-  cssPaths.forEach(cssPath => {
+  Promise.all(cssPaths.map(cssPath => {
     let pathToScript = getFullPath(importMeta);
     const scriptFileName = pathToScript.split("/").pop();
     pathToScript = pathToScript.replace(scriptFileName, "");
@@ -195,16 +264,36 @@ export const css = (importMeta, cssPaths) =>
     const cssAlreadyLinked = document.querySelector(`link[href='${cssPath}']`);
 
     if (cssAlreadyLinked) {
-      // console.warn(`CSS file already exists for path: ${cssPath}`);
-      return;
+      const isLoaded = cssAlreadyLinked.dataset.loaded === "true" || cssAlreadyLinked.sheet;
+      const existingLoad = isLoaded
+        ? Promise.resolve(cssPath)
+        : new Promise(resolve => {
+            cssAlreadyLinked.addEventListener("load", () => resolve(cssPath), { once: true });
+            cssAlreadyLinked.addEventListener("error", () => resolve(cssPath), { once: true });
+          });
+
+      pendingCssLoads.push(existingLoad);
+      return existingLoad;
     }
 
     const styleLink = document.createElement("link");
     styleLink.rel = "stylesheet";
     styleLink.href = cssPath;
 
+    const cssLoad = new Promise(resolve => {
+      styleLink.onload = () => {
+        styleLink.dataset.loaded = "true";
+        resolve(cssPath);
+      };
+
+      styleLink.onerror = () => resolve(cssPath);
+    });
+
+    pendingCssLoads.push(cssLoad);
     document.head.appendChild(styleLink);
-  });
+
+    return cssLoad;
+  }));
 
 /**
  * Inject a CDN script into <head>.
@@ -287,10 +376,16 @@ export const cdn = input =>
 export class Component {
   #states = {};
   #stateElements = {};
+  #isMounted = false;
+  #cleanup = null;
 
   constructor() {
     this.template = ""; // Public field (set only)
     this.logic = null; // Public field (set only)
+    this.beforeMount = null;
+    this.mounted = null;
+    this.beforeUnmount = null;
+    this.unmounted = null;
 
     /**
      * Helper function to validate the template and scripts.
@@ -307,6 +402,14 @@ export class Component {
       if (this.logic && typeof this.logic !== "function") {
         throw new Error("Scripts must be a function");
       }
+
+      [this.beforeMount, this.mounted, this.beforeUnmount, this.unmounted]
+        .filter(Boolean)
+        .forEach(lifecycle => {
+          if (typeof lifecycle !== "function") {
+            throw new Error("Lifecycle hooks must be functions");
+          }
+        });
     };
 
     /**
@@ -334,7 +437,7 @@ export class Component {
          */
         const element = this.#stateElements[uniqueElementId];
 
-        if (!element) {
+        if (!this.#isMounted || !element) {
           return;
         }
 
@@ -367,15 +470,56 @@ export class Component {
     const render = () => {
       validate();
 
-      // Append the root element to the DOM
-      setTimeout(() => {
-        bindStateElements(); // Bind state elements after rendering
-        if (this.logic) this.logic(); // Execute scripts (event listeners etc.)
-      }, 0);
+      if (!shouldQueueMounts) {
+        // Preserve direct `${new Component()}` rendering outside Root/Redirect.
+        setTimeout(() => this.__mount(), 0);
+      }
 
       return this.template; // Return the rendered template
     };
 
-    this.toString = () => render();
+    this.__mount = () => {
+      if (this.#isMounted) {
+        return;
+      }
+
+      bindStateElements();
+
+      if (this.beforeMount) this.beforeMount();
+      if (this.logic) {
+        const cleanup = this.logic();
+
+        if (typeof cleanup === "function") {
+          this.#cleanup = cleanup;
+        }
+      }
+      if (this.mounted) this.mounted();
+
+      this.#isMounted = true;
+    };
+
+    this.__unmount = () => {
+      if (!this.#isMounted) {
+        return;
+      }
+
+      if (this.beforeUnmount) this.beforeUnmount();
+      if (this.#cleanup) this.#cleanup();
+      if (this.unmounted) this.unmounted();
+
+      this.#stateElements = {};
+      this.#cleanup = null;
+      this.#isMounted = false;
+    };
+
+    this.toString = () => {
+      const renderedTemplate = render();
+
+      if (shouldQueueMounts) {
+        pendingMounts.push(this);
+      }
+
+      return renderedTemplate;
+    };
   }
 }

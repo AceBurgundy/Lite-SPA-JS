@@ -88,7 +88,12 @@ document.addEventListener("click", event => {
   renderRoute(destination, path);
 });
 
+/**
+ * Mounts all components currently queued in pendingMounts.
+ * @returns {Array<Component>} The list of mounted components.
+ */
 const mountQueuedComponents = () => {
+  /** @type {Array<Component>} */
   const components = pendingMounts.splice(0);
 
   components.forEach(component => component.__mount());
@@ -96,6 +101,10 @@ const mountQueuedComponents = () => {
   return components;
 };
 
+/**
+ * Unmounts all active components in reverse order.
+ * @returns {void}
+ */
 const unmountActiveComponents = () => {
   if (activeComponents.length === 0) {
     return;

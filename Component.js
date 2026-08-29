@@ -183,7 +183,7 @@ export class Redirect {
      * @returns {string} The anchor tag HTML.
      */
     const render = () => {
-      const uniqueAnchorId = `${id}-${uniqueId()}`;
+      const uniqueAnchorId = `${id}-${uniqueIdentifier()}`;
       routes[path] = destination;
 
       // Return anchor tag with unique ID
@@ -430,11 +430,11 @@ export class Component {
      * @returns {[any, function]} Current state and a setter function to update the state.
      */
     this.state = (initialValue, elementId) => {
-      let uniqueElementId = `${elementId}-${uniqueId()}`;
+      let uniqueElementId = `${elementId}-${uniqueIdentifier()}`;
 
       // Ensure unique element ID for states
       while (Object.hasOwn(this.#states, uniqueElementId)) {
-        uniqueElementId = `${elementId}-${uniqueId()}`;
+        uniqueElementId = `${elementId}-${uniqueIdentifier()}`;
       }
 
       let value = initialValue;

@@ -555,9 +555,10 @@ export class Component {
      * Function to manage state and return a state value with a setter.
      * @param {any} initialValue - Initial state value.
      * @param {string} elementId - The unique element ID for the element tied to this state.
-     * @returns {[any, function]} Current state and a setter function to update the state.
+     * @returns {[string, any, function(any): void]} A tuple containing the unique element ID, current state value, and a setter function.
      */
     this.state = (initialValue, elementId) => {
+      /** @type {string} */
       let uniqueElementId = `${elementId}-${uniqueIdentifier()}`;
 
       // Ensure unique element ID for states
@@ -565,15 +566,18 @@ export class Component {
         uniqueElementId = `${elementId}-${uniqueIdentifier()}`;
       }
 
+      /** @type {any} */
       let value = initialValue;
 
-      // Setter function to update the value and DOM
+      /**
+       * Updates the state value and modifies the associated DOM element text content.
+       * @param {any} newValue - The new state value.
+       * @returns {void}
+       */
       const setValue = newValue => {
         value = newValue;
 
-        /**
-         * @type {HTMLElement}
-         */
+        /** @type {HTMLElement|null} */
         const element = this.#stateElements[uniqueElementId];
 
         if (!this.#isMounted || !element) {

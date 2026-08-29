@@ -595,7 +595,8 @@ export class Component {
     };
 
     /**
-     * Called after rendering to bind elements to states.
+     * Called after rendering to bind DOM elements to states.
+     * @returns {void}
      */
     const bindStateElements = () => {
       Object.keys(this.#states).forEach(uniqueElementId => {
@@ -609,6 +610,7 @@ export class Component {
 
     /**
      * Render the template and bind event listeners.
+     * @returns {string} The rendered template string.
      */
     const render = () => {
       validate();
@@ -618,9 +620,13 @@ export class Component {
         setTimeout(() => this.__mount(), 0);
       }
 
-      return this.template; // Return the rendered template
+      return this.template;
     };
 
+    /**
+     * Mounts the component, executing lifecycle hooks and logic.
+     * @returns {void}
+     */
     this.__mount = () => {
       if (this.#isMounted) {
         return;
@@ -628,34 +634,58 @@ export class Component {
 
       bindStateElements();
 
-      if (this.beforeMount) this.beforeMount();
+      if (this.beforeMount) {
+        this.beforeMount();
+      }
+      
       if (this.logic) {
+        /** @type {any} */
         const cleanup = this.logic();
 
         if (typeof cleanup === "function") {
           this.#cleanup = cleanup;
         }
       }
-      if (this.mounted) this.mounted();
+      
+      if (this.mounted) {
+        this.mounted();
+      }
 
       this.#isMounted = true;
     };
 
+    /**
+     * Unmounts the component, executing unmount lifecycle hooks and cleaning up.
+     * @returns {void}
+     */
     this.__unmount = () => {
       if (!this.#isMounted) {
         return;
       }
 
-      if (this.beforeUnmount) this.beforeUnmount();
-      if (this.#cleanup) this.#cleanup();
-      if (this.unmounted) this.unmounted();
+      if (this.beforeUnmount) {
+        this.beforeUnmount();
+      }
+      
+      if (this.#cleanup) {
+        this.#cleanup();
+      }
+      
+      if (this.unmounted) {
+        this.unmounted();
+      }
 
       this.#stateElements = {};
       this.#cleanup = null;
       this.#isMounted = false;
     };
 
+    /**
+     * Converts the component to its string representation (the rendered HTML template).
+     * @returns {string} The HTML template string.
+     */
     this.toString = () => {
+      /** @type {string} */
       const renderedTemplate = render();
 
       if (shouldQueueMounts) {

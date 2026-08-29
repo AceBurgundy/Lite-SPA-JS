@@ -338,13 +338,18 @@ export const getFullPath = (importMeta) => {
 };
 
 /**
- * Load CSS files based on the provided paths.
- * @param {string[]} cssPaths - List of CSS paths to be loaded.
- **/
+ * Loads CSS files dynamically based on the provided paths and module metadata.
+ * @param {ImportMeta} importMeta - The import.meta object of the calling module.
+ * @param {Array<string>} cssPaths - List of CSS paths to be loaded.
+ * @returns {Promise<Array<string>>} A promise resolving to the list of loaded CSS paths.
+ */
 export const css = (importMeta, cssPaths) =>
   Promise.all(cssPaths.map(cssPath => {
+    /** @type {string} */
     let pathToScript = getFullPath(importMeta);
-    const scriptFileName = pathToScript.split("/").pop();
+
+    /** @type {string} */
+    const scriptFileName = pathToScript.split("/").pop() || "";
     pathToScript = pathToScript.replace(scriptFileName, "");
 
     cssPath = cssPath.startsWith("/")
@@ -353,10 +358,14 @@ export const css = (importMeta, cssPaths) =>
 
     cssPath = cssPath.replace(/([^:]\/)\/+/g, "$1");
 
+    /** @type {HTMLLinkElement|null} */
     const cssAlreadyLinked = document.querySelector(`link[href='${cssPath}']`);
 
     if (cssAlreadyLinked) {
-      const isLoaded = cssAlreadyLinked.dataset.loaded === "true" || cssAlreadyLinked.sheet;
+      /** @type {boolean} */
+      const isLoaded = cssAlreadyLinked.dataset.loaded === "true" || !!cssAlreadyLinked.sheet;
+
+      /** @type {Promise<string>} */
       const existingLoad = isLoaded
         ? Promise.resolve(cssPath)
         : new Promise(resolve => {
@@ -368,10 +377,12 @@ export const css = (importMeta, cssPaths) =>
       return existingLoad;
     }
 
+    /** @type {HTMLLinkElement} */
     const styleLink = document.createElement("link");
     styleLink.rel = "stylesheet";
     styleLink.href = cssPath;
 
+    /** @type {Promise<string>} */
     const cssLoad = new Promise(resolve => {
       styleLink.onload = () => {
         styleLink.dataset.loaded = "true";

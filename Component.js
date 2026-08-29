@@ -489,23 +489,45 @@ export const cdn = input =>
     appendScript(input.trim());
   });
 
-// Using ES2022 features for private fields
+/**
+ * Base Component class for Lite SPA JS applications.
+ */
 export class Component {
+  /** @type {Record<string, any>} */
   #states = {};
+
+  /** @type {Record<string, HTMLElement|null>} */
   #stateElements = {};
+
+  /** @type {boolean} */
   #isMounted = false;
+
+  /** @type {function()|null} */
   #cleanup = null;
 
   constructor() {
-    this.template = ""; // Public field (set only)
-    this.logic = null; // Public field (set only)
+    /** @type {string} */
+    this.template = "";
+
+    /** @type {function()|null} */
+    this.logic = null;
+
+    /** @type {function()|null} */
     this.beforeMount = null;
+
+    /** @type {function()|null} */
     this.mounted = null;
+
+    /** @type {function()|null} */
     this.beforeUnmount = null;
+
+    /** @type {function()|null} */
     this.unmounted = null;
 
     /**
-     * Helper function to validate the template and scripts.
+     * Helper function to validate the template and lifecycle hooks.
+     * @returns {void}
+     * @throws {Error} If template or lifecycle hooks are invalid.
      */
     const validate = () => {
       if (typeof this.template !== "string") {

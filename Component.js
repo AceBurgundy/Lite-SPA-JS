@@ -114,15 +114,28 @@ const unmountActiveComponents = () => {
   activeComponents = [];
 };
 
+/**
+ * Renders a component for a specific path, updating browser history if requested.
+ * @param {typeof Component} destination - The component class to render.
+ * @param {string} path - The URL path associated with the component.
+ * @param {Object} [options] - Optional settings.
+ * @param {boolean} [options.replace=false] - Whether to replace the history state instead of pushing.
+ * @param {boolean} [options.updateHistory=true] - Whether to update the browser history.
+ * @returns {Promise<void>} A promise that resolves when the route rendering is complete.
+ */
 const renderRoute = async (destination, path, { replace = false, updateHistory = true } = {}) => {
+  /** @type {number} */
   const currentRenderVersion = ++renderVersion;
   routes[path] = destination;
 
+  /** @type {string} */
   let template = "";
 
   try {
     pendingMounts.splice(0);
     shouldQueueMounts = true;
+
+    /** @type {Component} */
     const component = new destination();
     template = component.toString();
   } finally {
@@ -136,6 +149,7 @@ const renderRoute = async (destination, path, { replace = false, updateHistory =
   }
 
   if (updateHistory && window.location.pathname !== path) {
+    /** @type {string} */
     const method = replace ? "replaceState" : "pushState";
     window.history[method](routeState(path), "", path);
   }

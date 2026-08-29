@@ -1,8 +1,19 @@
+/** @type {Record<string, typeof Component>} */
 const routes = {};
+
+/** @type {Array<Promise<string>>} */
 const pendingCssLoads = [];
+
+/** @type {Array<Component>} */
 const pendingMounts = [];
+
+/** @type {Array<Component>} */
 let activeComponents = [];
+
+/** @type {boolean} */
 let shouldQueueMounts = false;
+
+/** @type {number} */
 let renderVersion = 0;
 
 /**

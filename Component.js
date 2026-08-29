@@ -408,6 +408,7 @@ export const css = (importMeta, cssPaths) =>
  *   cdn('<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>');
  *
  * @param {string} input - Full <script> tag string OR URL string.
+ * @returns {Promise<void>} A promise that resolves when the script is loaded.
  */
 export const cdn = input =>
   new Promise((resolve, reject) => {
@@ -419,16 +420,23 @@ export const cdn = input =>
       return;
     }
 
-    const appendScript = (src, isModule = false) => {
-      const existing = document.querySelector(`script[data-cdn="${src}"]`);
+    /**
+     * Appends a script element to the document head.
+     * @param {string} source - The source URL of the script.
+     * @param {boolean} [isModule=false] - Whether the script is an ES module.
+     * @returns {void}
+     */
+    const appendScript = (source, isModule = false) => {
+      /** @type {HTMLScriptElement|null} */
+      const existingScript = document.querySelector(`script[data-cdn="${source}"]`);
 
-      if (existing) {
-        if (existing.dataset.loaded === "true") {
+      if (existingScript) {
+        if (existingScript.dataset.loaded === "true") {
           resolve();
         } else {
-          existing.addEventListener("load", () => resolve(), { once: true });
-          existing.addEventListener("error", () => reject(
-              new Error(`Failed to load ${src}`)
+          existingScript.addEventListener("load", () => resolve(), { once: true });
+          existingScript.addEventListener("error", () => reject(
+              new Error(`Failed to load ${source}`)
             ), { once: true }
           );
         }
@@ -436,11 +444,14 @@ export const cdn = input =>
         return;
       }
 
+      /** @type {HTMLScriptElement} */
       const script = document.createElement("script");
-      script.src = src;
+      script.src = source;
 
-      if (isModule) script.type = "module";
-      script.setAttribute("data-cdn", src);
+      if (isModule) {
+        script.type = "module";
+      }
+      script.setAttribute("data-cdn", source);
 
       script.onload = () => {
         script.dataset.loaded = "true";
@@ -449,15 +460,18 @@ export const cdn = input =>
 
       script.onerror = () =>
         reject(
-          new Error(`Failed to load ${src}`)
+          new Error(`Failed to load ${source}`)
         );
 
       document.head.appendChild(script);
     };
 
     if (input.trim().startsWith("<script") === true) {
+      /** @type {HTMLTemplateElement} */
       const template = document.createElement("template");
       template.innerHTML = input.trim();
+
+      /** @type {ChildNode|null} */
       const parsedScript = template.content.firstChild;
 
       if (!(parsedScript instanceof HTMLScriptElement) === true) {
